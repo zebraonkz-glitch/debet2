@@ -12,7 +12,15 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="project/new" options={{ title: 'Новый проект', presentation: 'modal' }} />
           <Stack.Screen name="project/[id]" options={{ title: 'Проект' }} />
+          <Stack.Screen name="project/[id]/edit" options={{ title: 'Редактирование', presentation: 'modal' }} />
+          <Stack.Screen
+            name="transaction/new"
+            options={{ title: 'Новая операция', presentation: 'modal' }}
+          />
+          <Stack.Screen name="transaction/[id]" options={{ title: 'Операция' }} />
+          <Stack.Screen name="categories" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </DatabaseProvider>

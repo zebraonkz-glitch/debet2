@@ -1,6 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { CategoryType, Transaction } from '@/types';
-import type { CreateTransactionInput, TransactionFilters, UpdateTransactionInput } from '@/types';
+import type {
+  CreateTransactionInput,
+  TransactionFilters,
+  TransactionEnriched,
+  UpdateTransactionInput,
+} from '@/types';
 import { mapTransactionRow, type TransactionRow } from '../mappers';
 import { generateId, nowIso } from '@/utils/id';
 import {
@@ -118,6 +123,64 @@ export async function getAllTransactions(
   );
 
   return rows.map(mapTransactionRow);
+}
+
+type EnrichedRow = TransactionRow & {
+  project_name: string;
+  category_name: string;
+  category_type: CategoryType;
+};
+
+export async function getTransactionsEnriched(
+  db: SQLiteDatabase,
+  filters?: TransactionFilters,
+): Promise<TransactionEnriched[]> {
+  const conditions: string[] = [];
+  const params: (string | number)[] = [];
+
+  if (filters?.projectId) {
+    conditions.push('t.project_id = ?');
+    params.push(filters.projectId);
+  }
+  if (filters?.categoryId) {
+    conditions.push('t.category_id = ?');
+    params.push(filters.categoryId);
+  }
+  if (filters?.dateFrom) {
+    conditions.push('t.date >= ?');
+    params.push(filters.dateFrom);
+  }
+  if (filters?.dateTo) {
+    conditions.push('t.date <= ?');
+    params.push(filters.dateTo);
+  }
+  if (filters?.categoryTypes && filters.categoryTypes.length > 0) {
+    const placeholders = filters.categoryTypes.map(() => '?').join(', ');
+    conditions.push(`c.type IN (${placeholders})`);
+    params.push(...filters.categoryTypes);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const rows = await db.getAllAsync<EnrichedRow>(
+    `SELECT
+       t.id, t.project_id, t.category_id, t.amount, t.date, t.comment, t.created_at,
+       p.name AS project_name,
+       c.name AS category_name,
+       c.type AS category_type
+     FROM transactions t
+     INNER JOIN projects p ON p.id = t.project_id
+     INNER JOIN categories c ON c.id = t.category_id
+     ${whereClause}
+     ORDER BY t.date DESC, t.created_at DESC`,
+    ...params,
+  );
+
+  return rows.map((row) => ({
+    ...mapTransactionRow(row),
+    projectName: row.project_name,
+    categoryName: row.category_name,
+    categoryType: row.category_type,
+  }));
 }
 
 export async function updateTransaction(

@@ -43,4 +43,5 @@ export interface TransactionFilters {
   categoryId?: string;
   dateFrom?: string;
   dateTo?: string;
+  categoryTypes?: CategoryType[];
 }

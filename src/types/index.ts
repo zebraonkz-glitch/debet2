@@ -19,3 +19,5 @@ export type {
   UpdateProjectInput,
   UpdateTransactionInput,
 } from './inputs';
+
+export type { TransactionEnriched } from './views';
