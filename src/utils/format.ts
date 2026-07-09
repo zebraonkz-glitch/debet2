@@ -62,3 +62,30 @@ export function getCurrentMonthRange(): { dateFrom: string; dateTo: string } {
     dateTo: `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`,
   };
 }
+
+const MONTH_NAMES = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+];
+
+export function formatMonthYear(year: number, month: number): string {
+  return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
+export function formatQuarterLabel(year: number, quarter: 1 | 2 | 3 | 4): string {
+  return `${quarter}-й квартал ${year}`;
+}
+
+export function formatPeriodRange(period: { dateFrom: string; dateTo: string }): string {
+  return `${formatDate(period.dateFrom)} — ${formatDate(period.dateTo)}`;
+}

@@ -36,6 +36,7 @@ export default function RootLayout() {
             options={{ title: 'Долгоиграющий расход', presentation: 'modal' }}
           />
           <Stack.Screen name="long-term/[id]" options={{ title: 'Долгоиграющий расход' }} />
+          <Stack.Screen name="report/[projectId]" options={{ title: 'Детализация' }} />
         </Stack>
       </ThemeProvider>
     </DatabaseProvider>

@@ -86,3 +86,29 @@ export function isMonthActive(
   const effectiveEnd = endDate ?? '9999-12-31';
   return compareDates(monthEnd, startDate) >= 0 && compareDates(monthStart, effectiveEnd) <= 0;
 }
+
+export function getMonthRange(year: number, month: number): DatePeriod {
+  const monthStr = String(month).padStart(2, '0');
+  const lastDay = new Date(year, month, 0).getDate();
+  return {
+    dateFrom: `${year}-${monthStr}-01`,
+    dateTo: `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`,
+  };
+}
+
+export function getQuarterRange(year: number, quarter: 1 | 2 | 3 | 4): DatePeriod {
+  const startMonth = (quarter - 1) * 3 + 1;
+  const endMonth = startMonth + 2;
+  const startMonthStr = String(startMonth).padStart(2, '0');
+  const endMonthStr = String(endMonth).padStart(2, '0');
+  const lastDay = new Date(year, endMonth, 0).getDate();
+  return {
+    dateFrom: `${year}-${startMonthStr}-01`,
+    dateTo: `${year}-${endMonthStr}-${String(lastDay).padStart(2, '0')}`,
+  };
+}
+
+export function getCurrentQuarter(): 1 | 2 | 3 | 4 {
+  const month = new Date().getMonth() + 1;
+  return Math.ceil(month / 3) as 1 | 2 | 3 | 4;
+}

@@ -29,3 +29,11 @@ export type {
 } from './inputs';
 
 export type { TransactionEnriched } from './views';
+export type {
+  ActivityReport,
+  ActivityReportTotals,
+  CategoryAmountLine,
+  DistributedExpenseLine,
+  ProjectReportDetail,
+  ProjectReportLine,
+} from './views';
