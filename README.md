@@ -6,7 +6,7 @@
 
 - Node.js 18+
 - npm (устанавливается вместе с Node.js)
-- [Expo Go](https://expo.dev/go) на телефоне или Android Studio / Xcode для эмулятора
+- **Expo Go для SDK 57** — скачать с [expo.dev/go](https://expo.dev/go) (версия в App Store / Play Store может быть старше)
 
 ## Установка
 
@@ -20,6 +20,10 @@ npm install
 ```powershell
 # Dev-сервер (QR-код для Expo Go)
 npx expo start
+
+# Если телефон не подключается по Wi‑Fi (разные сети, файрвол)
+npm run start:tunnel
+```
 
 # Android-эмулятор
 npx expo start --android
