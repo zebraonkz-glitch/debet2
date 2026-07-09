@@ -1,10 +1,11 @@
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import type { ColorValue } from 'react-native';
 import { Colors } from '@/utils/colors';
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
 
-function TabBarIcon({ name, color }: { name: TabIconName; color: string }) {
+function TabBarIcon({ name, color }: { name: TabIconName; color: ColorValue }) {
   return <Ionicons size={24} name={name} color={color} style={{ marginBottom: -2 }} />;
 }
 

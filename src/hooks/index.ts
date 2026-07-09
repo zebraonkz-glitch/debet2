@@ -1,1 +1,1 @@
-// Хуки доступа к данным — этап 1+
+export { useDatabase, useDb } from './useDatabase';

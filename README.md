@@ -45,7 +45,7 @@ npm run format
 ## Структура
 
 - `app/` — экраны (Expo Router)
-- `src/db/` — SQLite
+- `src/db/` — SQLite (схема, миграции, репозитории)
 - `src/domain/` — бизнес-логика
 - `src/components/` — UI-компоненты
 - `src/hooks/` — хуки данных
