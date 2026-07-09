@@ -21,6 +21,21 @@ export default function RootLayout() {
           />
           <Stack.Screen name="transaction/[id]" options={{ title: 'Операция' }} />
           <Stack.Screen name="categories" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="allocation-rule/new"
+            options={{ title: 'Новое правило', presentation: 'modal' }}
+          />
+          <Stack.Screen name="allocation-rule/[id]" options={{ title: 'Правило' }} />
+          <Stack.Screen
+            name="recurring/new"
+            options={{ title: 'Постоянный расход', presentation: 'modal' }}
+          />
+          <Stack.Screen name="recurring/[id]" options={{ title: 'Постоянный расход' }} />
+          <Stack.Screen
+            name="long-term/new"
+            options={{ title: 'Долгоиграющий расход', presentation: 'modal' }}
+          />
+          <Stack.Screen name="long-term/[id]" options={{ title: 'Долгоиграющий расход' }} />
         </Stack>
       </ThemeProvider>
     </DatabaseProvider>

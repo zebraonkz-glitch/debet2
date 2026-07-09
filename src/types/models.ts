@@ -45,3 +45,25 @@ export interface AllocationRule {
   method: AllocationMethod;
   shares: AllocationShare[];
 }
+
+export interface RecurringExpense {
+  id: string;
+  categoryId: string;
+  amount: number;
+  period: RecurringPeriod;
+  startDate: string;
+  endDate?: string;
+  allocationRuleId: string;
+  comment?: string;
+}
+
+export interface LongTermExpense {
+  id: string;
+  categoryId: string;
+  totalAmount: number;
+  startDate: string;
+  endDate: string;
+  distributionMethod: DistributionMethod;
+  allocationRuleId: string;
+  comment?: string;
+}

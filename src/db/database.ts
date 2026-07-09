@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { runMigrations } from './migrate';
-import { seedDatabaseIfEmpty } from './seed';
+import { seedAllocationDataIfEmpty, seedDatabaseIfEmpty } from './seed';
 
 const DATABASE_NAME = 'debet2.db';
 
@@ -11,6 +11,7 @@ async function openDatabase(): Promise<SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
   await runMigrations(db);
   await seedDatabaseIfEmpty(db);
+  await seedAllocationDataIfEmpty(db);
   return db;
 }
 

@@ -1,4 +1,9 @@
-import type { CategoryType } from '@/types';
+import type {
+  AllocationMethod,
+  CategoryType,
+  DistributionMethod,
+  RecurringPeriod,
+} from '@/types';
 
 export const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
   income: 'Доход',
@@ -8,6 +13,22 @@ export const CATEGORY_TYPE_LABELS: Record<CategoryType, string> = {
 };
 
 export const OPERATION_CATEGORY_TYPES: CategoryType[] = ['income', 'expense_direct'];
+
+export const ALLOCATION_METHOD_LABELS: Record<AllocationMethod, string> = {
+  proportional: 'Пропорционально доходам',
+  fixed_shares: 'Фиксированные доли',
+  equal: 'Поровну',
+};
+
+export const RECURRING_PERIOD_LABELS: Record<RecurringPeriod, string> = {
+  monthly: 'Ежемесячно',
+  yearly: 'Ежегодно',
+};
+
+export const DISTRIBUTION_METHOD_LABELS: Record<DistributionMethod, string> = {
+  linear: 'Линейно по месяцам',
+  manual: 'По правилу распределения',
+};
 
 export function formatMoney(amount: number): string {
   return new Intl.NumberFormat('ru-RU', {

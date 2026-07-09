@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "test": "jest",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
   },
   "dependencies": {
@@ -35,10 +36,13 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.4",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~57.0.0",
+    "jest": "^30.4.2",
     "prettier": "^3.4.2",
+    "ts-jest": "^29.4.11",
     "typescript": "~6.0.3"
   },
   "private": true

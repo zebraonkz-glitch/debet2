@@ -1,1 +1,3 @@
-// Бизнес-логика: распределение расходов, отчёты — этап 3–4
+export * from './periodUtils';
+export * from './allocationService';
+export * from './allocationQueries';

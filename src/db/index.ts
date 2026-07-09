@@ -3,4 +3,7 @@ export { runMigrations } from './migrate';
 export * from './repositories/projectRepository';
 export * from './repositories/categoryRepository';
 export * from './repositories/transactionRepository';
-export { seedDatabaseIfEmpty } from './seed';
+export * from './repositories/allocationRuleRepository';
+export * from './repositories/recurringExpenseRepository';
+export * from './repositories/longTermExpenseRepository';
+export { seedDatabaseIfEmpty, seedAllocationDataIfEmpty } from './seed';

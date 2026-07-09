@@ -1,4 +1,10 @@
-import type { CategoryType } from './models';
+import type {
+  AllocationMethod,
+  AllocationShare,
+  CategoryType,
+  DistributionMethod,
+  RecurringPeriod,
+} from './models';
 
 export interface CreateProjectInput {
   name: string;
@@ -44,4 +50,56 @@ export interface TransactionFilters {
   dateFrom?: string;
   dateTo?: string;
   categoryTypes?: CategoryType[];
+}
+
+export interface CreateAllocationRuleInput {
+  name: string;
+  method: AllocationMethod;
+  shares?: AllocationShare[];
+}
+
+export interface UpdateAllocationRuleInput {
+  name?: string;
+  method?: AllocationMethod;
+  shares?: AllocationShare[];
+}
+
+export interface CreateRecurringExpenseInput {
+  categoryId: string;
+  amount: number;
+  period: RecurringPeriod;
+  startDate: string;
+  endDate?: string;
+  allocationRuleId: string;
+  comment?: string;
+}
+
+export interface UpdateRecurringExpenseInput {
+  categoryId?: string;
+  amount?: number;
+  period?: RecurringPeriod;
+  startDate?: string;
+  endDate?: string | null;
+  allocationRuleId?: string;
+  comment?: string | null;
+}
+
+export interface CreateLongTermExpenseInput {
+  categoryId: string;
+  totalAmount: number;
+  startDate: string;
+  endDate: string;
+  distributionMethod: DistributionMethod;
+  allocationRuleId: string;
+  comment?: string;
+}
+
+export interface UpdateLongTermExpenseInput {
+  categoryId?: string;
+  totalAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  distributionMethod?: DistributionMethod;
+  allocationRuleId?: string;
+  comment?: string | null;
 }
