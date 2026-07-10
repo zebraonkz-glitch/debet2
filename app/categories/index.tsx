@@ -3,7 +3,6 @@ import {
   Alert,
   FlatList,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -89,7 +88,7 @@ export default function CategoriesScreen() {
             <Text style={styles.formTitle}>Новая категория</Text>
             <FormField label="Название" value={name} onChangeText={setName} error={error} />
             <Text style={styles.label}>Тип</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.types}>
+            <View style={styles.types}>
               {GROUP_ORDER.map((itemType) => (
                 <Pressable
                   key={itemType}
@@ -106,7 +105,7 @@ export default function CategoriesScreen() {
                   </Text>
                 </Pressable>
               ))}
-            </ScrollView>
+            </View>
             <PrimaryButton title="Добавить категорию" onPress={handleCreate} />
           </View>
         }
@@ -151,14 +150,18 @@ const styles = StyleSheet.create({
   },
   formTitle: { fontSize: 16, fontWeight: '600', color: Colors.text, marginBottom: 8 },
   label: { fontSize: 14, fontWeight: '600', color: Colors.text, marginBottom: 8 },
-  types: { marginBottom: 16 },
+  types: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
   typeChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.border,
-    marginRight: 8,
     backgroundColor: '#fff',
   },
   typeChipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { FormField, PrimaryButton, SelectField } from '@/components/Form';
 import { OptionPickerModal, type SelectOption } from '@/components/OptionPickerModal';
 import {
@@ -51,6 +51,7 @@ export function TransactionForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [picker, setPicker] = useState<'project' | 'category' | null>(null);
+  const defaultsAppliedRef = useRef(false);
 
   const loadData = useCallback(async () => {
     const [allProjects, allCategories] = await Promise.all([
@@ -61,7 +62,8 @@ export function TransactionForm({
     setProjects(allProjects);
     setCategories(filteredCategories);
 
-    if (mode === 'create' && !transaction) {
+    if (mode === 'create' && !transaction && !defaultsAppliedRef.current) {
+      defaultsAppliedRef.current = true;
       const defaults = await getLastOperationDefaults(operationType);
       let nextProjectId = '';
       let nextCategoryId = '';
@@ -86,9 +88,11 @@ export function TransactionForm({
     }
   }, [db, mode, operationType, categoryType, transaction]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadData();
+    }, [loadData]),
+  );
 
   const projectOptions: SelectOption[] = useMemo(
     () => projects.map((p) => ({ id: p.id, label: p.name })),
@@ -167,6 +171,11 @@ export function TransactionForm({
           error={errors.categoryId}
           onPress={() => setPicker('category')}
         />
+        {operationType === 'expense' ? (
+          <Text style={styles.fieldHint}>
+            Показаны категории типа «Прямой расход». Для постоянных и долгоиграющих — вкладка «Расходы».
+          </Text>
+        ) : null}
 
         <FormField
           label="Сумма, ₽"
@@ -224,6 +233,12 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 14,
     color: Colors.textMuted,
+    marginBottom: 16,
+  },
+  fieldHint: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginTop: -8,
     marginBottom: 16,
   },
 });

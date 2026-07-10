@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { FormField, PrimaryButton, SelectField } from '@/components/Form';
 import { OptionPickerModal, type SelectOption } from '@/components/OptionPickerModal';
 import {
@@ -66,6 +66,7 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
   const [picker, setPicker] = useState<'category' | 'rule' | null>(null);
   const [error, setError] = useState('');
   const [loaded, setLoaded] = useState(mode === 'create');
+  const defaultsAppliedRef = useRef(false);
 
   const categoryType = kind === 'recurring' ? 'expense_recurring' : 'expense_long_term';
 
@@ -86,7 +87,8 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
         const expense = await getLongTermExpenseById(db, expenseId);
         if (expense) fillLongTerm(expense);
       }
-    } else {
+    } else if (!defaultsAppliedRef.current) {
+      defaultsAppliedRef.current = true;
       if (filtered[0]) setCategoryId(filtered[0].id);
       if (allRules[0]) setAllocationRuleId(allRules[0].id);
       if (kind === 'long-term') {
@@ -116,9 +118,11 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
     setComment(expense.comment ?? '');
   };
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
 
   const categoryOptions: SelectOption[] = useMemo(
     () => categories.map((c) => ({ id: c.id, label: c.name })),
