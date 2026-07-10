@@ -163,6 +163,9 @@ export default function HomeScreen() {
       <Pressable style={styles.link} onPress={() => router.push('/(tabs)/report')}>
         <Text style={styles.linkText}>Полный отчёт →</Text>
       </Pressable>
+      <Pressable style={styles.link} onPress={() => router.push('/settings')}>
+        <Text style={styles.linkText}>Настройки →</Text>
+      </Pressable>
     </ScrollView>
   );
 }

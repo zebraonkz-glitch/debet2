@@ -30,11 +30,18 @@ export const DISTRIBUTION_METHOD_LABELS: Record<DistributionMethod, string> = {
   manual: 'По правилу распределения',
 };
 
-import { getDisplaySettingsSnapshot } from './displaySettings';
+import { getDisplaySettingsSnapshot, type AppCurrency } from './displaySettings';
+
+const CURRENCY_LOCALES: Record<AppCurrency, string> = {
+  RUB: 'ru-RU',
+  KZT: 'kk-KZ',
+  USD: 'en-US',
+  EUR: 'de-DE',
+};
 
 export function formatMoney(amount: number): string {
   const { currency } = getDisplaySettingsSnapshot();
-  return new Intl.NumberFormat('ru-RU', {
+  return new Intl.NumberFormat(CURRENCY_LOCALES[currency], {
     style: 'currency',
     currency,
     maximumFractionDigits: 0,

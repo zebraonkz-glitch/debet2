@@ -14,7 +14,7 @@ export default function RootLayout() {
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="settings/index" options={{ title: 'Настройки' }} />
+            <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="project/new" options={{ title: 'Новый проект', presentation: 'modal' }} />
           <Stack.Screen name="project/[id]" options={{ title: 'Проект' }} />
           <Stack.Screen name="project/[id]/edit" options={{ title: 'Редактирование', presentation: 'modal' }} />

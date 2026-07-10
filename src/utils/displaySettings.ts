@@ -1,4 +1,4 @@
-export type AppCurrency = 'RUB' | 'USD' | 'EUR';
+export type AppCurrency = 'RUB' | 'USD' | 'EUR' | 'KZT';
 export type AppDateFormat = 'dd.mm.yyyy' | 'yyyy-mm-dd';
 
 export type DisplaySettings = {
@@ -13,6 +13,7 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
 
 export const CURRENCY_OPTIONS: { id: AppCurrency; label: string }[] = [
   { id: 'RUB', label: 'Российский рубль (₽)' },
+  { id: 'KZT', label: 'Казахстанский тенге (₸)' },
   { id: 'USD', label: 'Доллар США ($)' },
   { id: 'EUR', label: 'Евро (€)' },
 ];
