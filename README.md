@@ -108,6 +108,21 @@ npm run build:ios:production
 
 После сборки ссылка на скачивание появится в терминале и на [expo.dev](https://expo.dev).
 
+### Уменьшение размера APK
+
+В проекте включены оптимизации (`expo-build-properties`):
+
+| Настройка | Эффект |
+|-----------|--------|
+| `buildArchs: arm64-v8a` | Только 64-бит ARM (большинство телефонов с 2018 г.) |
+| `enableMinifyInReleaseBuilds` | R8 — сжатие Java/Kotlin кода |
+| `enableShrinkResourcesInReleaseBuilds` | Удаление неиспользуемых ресурсов |
+| `enableBundleCompression` | Сжатие JS-бандла в APK |
+
+> APK не установится на очень старые 32-битные устройства. Для максимальной совместимости в `app.json` можно добавить `"armeabi-v7a"` в `buildArchs`.
+
+Для Google Play предпочтительнее **AAB** (`production`) — магазин сам отдаёт APK под архитектуру устройства.
+
 ### Версии приложения
 
 - `app.json` → `version` — пользовательская версия (1.0.0)
