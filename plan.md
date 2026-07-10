@@ -231,10 +231,10 @@ ReportPeriod — вычисляемая сущность (не хранится)
 
 ### Этап 5. Экспорт CSV (1 день)
 
-- [ ] Генерация CSV (UTF-8 с BOM для Excel).
-- [ ] Сохранение через `expo-file-system`.
-- [ ] Шаринг через `expo-sharing` (файлы, мессенджеры).
-- [ ] Имя файла: `rezultaty_YYYY-MM_YYYYMMDD.csv`.
+- [x] Генерация CSV (UTF-8 с BOM для Excel).
+- [x] Сохранение через `expo-file-system`.
+- [x] Шаринг через `expo-sharing` (файлы, мессенджеры).
+- [x] Имя файла: `rezultaty_YYYY-MM_YYYYMMDD.csv`.
 
 **Критерий готовности:** CSV открывается в Excel / Google Sheets с корректной кириллицей.
 

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { FilterChip, FilterRow } from '@/components/FilterChip';
+import { PrimaryButton } from '@/components/Form';
 import { buildActivityReport } from '@/domain/reportService';
 import { getCurrentQuarter, getMonthRange, getQuarterRange } from '@/domain/periodUtils';
 import { useDb } from '@/hooks';
@@ -23,6 +25,7 @@ import {
   formatQuarterLabel,
   getCurrentMonthRange,
 } from '@/utils/format';
+import { shareActivityReportCsv } from '@/utils/reportExport';
 
 type PeriodMode = 'month' | 'quarter' | 'custom';
 
@@ -38,6 +41,7 @@ export default function ReportScreen() {
   const [customTo, setCustomTo] = useState(getCurrentMonthRange().dateTo);
   const [report, setReport] = useState<ActivityReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const period = useMemo(() => {
     if (periodMode === 'month') {
@@ -94,6 +98,22 @@ export default function ReportScreen() {
         row.recurringExpense !== 0 ||
         row.longTermExpense !== 0,
     ) ?? false;
+
+  const handleExport = async () => {
+    if (!report || !hasActivity) {
+      return;
+    }
+
+    setExporting(true);
+    try {
+      await shareActivityReportCsv(report, periodLabel);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось экспортировать отчёт';
+      Alert.alert('Ошибка экспорта', message);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -271,6 +291,14 @@ export default function ReportScreen() {
           </View>
 
           <Text style={styles.hint}>Нажмите на строку проекта для детализации расходов.</Text>
+
+          <View style={styles.exportBlock}>
+            <PrimaryButton
+              title={exporting ? 'Подготовка…' : 'Экспорт CSV'}
+              onPress={handleExport}
+              disabled={exporting}
+            />
+          </View>
         </ScrollView>
       )}
     </View>
@@ -355,4 +383,5 @@ const styles = StyleSheet.create({
   totalLabel: { fontWeight: '700', color: Colors.text },
   totalValue: { fontWeight: '700' },
   hint: { fontSize: 13, color: Colors.textMuted, marginTop: 14, lineHeight: 20 },
+  exportBlock: { marginTop: 20 },
 });
