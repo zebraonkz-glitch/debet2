@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 dist/
 web-build/
 expo-env.d.ts
+
+# Native (генерируется prebuild)
+android/
+ios/

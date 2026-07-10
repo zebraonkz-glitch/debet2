@@ -1,18 +1,21 @@
 {
   "name": "debet2",
-  "main": "expo-router/entry",
   "version": "1.0.0",
+  "private": true,
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "start:tunnel": "expo start --tunnel",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format": "prettier --write .",
     "doctor": "npx expo-doctor",
+    "prebuild:android": "expo prebuild --platform android --clean",
+    "build:apk:local": "powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
     "build:android:preview": "eas build --platform android --profile preview",
     "build:android:production": "eas build --platform android --profile production",
     "build:ios:preview": "eas build --platform ios --profile preview",
@@ -54,13 +57,9 @@
     "ts-jest": "^29.4.11",
     "typescript": "~6.0.3"
   },
-  "private": true,
   "expo": {
     "install": {
-      "exclude": [
-        "jest",
-        "@types/jest"
-      ]
+      "exclude": ["jest", "@types/jest"]
     }
   }
 }
