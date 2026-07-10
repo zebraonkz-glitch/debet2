@@ -15,12 +15,11 @@ import {
   longTermExpenseAmountInPeriod,
   recurringExpenseAmountInPeriod,
 } from '@/domain/allocationService';
-import { useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { AllocationRule, Category, LongTermExpense, RecurringExpense } from '@/types';
 import { Colors } from '@/utils/colors';
 import {
   ALLOCATION_METHOD_LABELS,
-  formatMoney,
   getCurrentMonthRange,
   RECURRING_PERIOD_LABELS,
 } from '@/utils/format';
@@ -29,13 +28,16 @@ type ExpenseListItem = {
   id: string;
   kind: 'recurring' | 'long-term';
   title: string;
-  subtitle: string;
+  periodLabel?: string;
+  totalAmount?: number;
+  ruleName: string;
   monthAmount: number;
 };
 
 export default function ExpensesScreen() {
   const db = useDb();
   const router = useRouter();
+  const { formatMoney } = useDisplayFormat();
   const [items, setItems] = useState<ExpenseListItem[]>([]);
   const [rules, setRules] = useState<AllocationRule[]>([]);
   const [preview, setPreview] = useState<{ projectName: string; amount: number }[]>([]);
@@ -143,7 +145,11 @@ export default function ExpensesScreen() {
             }
           >
             <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardMeta}>{item.subtitle}</Text>
+            <Text style={styles.cardMeta}>
+              {item.kind === 'recurring'
+                ? `${item.periodLabel} · ${item.ruleName}`
+                : `${formatMoney(item.totalAmount ?? 0)} · ${item.ruleName}`}
+            </Text>
             <Text style={styles.cardAmount}>За месяц: {formatMoney(item.monthAmount)}</Text>
           </Pressable>
         )}
@@ -165,7 +171,8 @@ function toRecurringItem(
     id: expense.id,
     kind: 'recurring',
     title: category?.name ?? 'Постоянный расход',
-    subtitle: `${RECURRING_PERIOD_LABELS[expense.period]} · ${rule?.name ?? 'Правило'}`,
+    periodLabel: RECURRING_PERIOD_LABELS[expense.period],
+    ruleName: rule?.name ?? 'Правило',
     monthAmount: recurringExpenseAmountInPeriod(expense, period),
   };
 }
@@ -182,7 +189,8 @@ function toLongTermItem(
     id: expense.id,
     kind: 'long-term',
     title: category?.name ?? 'Долгоиграющий расход',
-    subtitle: `${formatMoney(expense.totalAmount)} · ${rule?.name ?? 'Правило'}`,
+    totalAmount: expense.totalAmount,
+    ruleName: rule?.name ?? 'Правило',
     monthAmount: longTermExpenseAmountInPeriod(expense, period),
   };
 }

@@ -42,10 +42,14 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   }, []);
 
   const updateSettings = useCallback(async (partial: Partial<DisplaySettings>) => {
-    const next = { ...settings, ...partial };
-    await saveDisplaySettings(next);
-    setSettings(next);
-  }, [settings]);
+    let nextSettings = DEFAULT_DISPLAY_SETTINGS;
+    setSettings((prev) => {
+      nextSettings = { ...prev, ...partial };
+      applyDisplaySettings(nextSettings);
+      return nextSettings;
+    });
+    await saveDisplaySettings(nextSettings);
+  }, []);
 
   const value = useMemo(
     () => ({ settings, ready, updateSettings }),

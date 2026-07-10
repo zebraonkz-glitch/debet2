@@ -15,13 +15,11 @@ import { FilterChip, FilterRow } from '@/components/FilterChip';
 import { PrimaryButton } from '@/components/Form';
 import { buildActivityReport } from '@/domain/reportService';
 import { getCurrentQuarter, getMonthRange, getQuarterRange } from '@/domain/periodUtils';
-import { useAppSettings, useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { ActivityReport } from '@/types';
 import { Colors } from '@/utils/colors';
 import {
   formatMonthYear,
-  formatMoney,
-  formatPeriodRange,
   formatQuarterLabel,
   getCurrentMonthRange,
 } from '@/utils/format';
@@ -32,7 +30,7 @@ type PeriodMode = 'month' | 'quarter' | 'custom';
 export default function ReportScreen() {
   const db = useDb();
   const router = useRouter();
-  useAppSettings();
+  const { formatMoney, formatPeriod } = useDisplayFormat();
   const now = new Date();
   const [periodMode, setPeriodMode] = useState<PeriodMode>('month');
   const [year, setYear] = useState(now.getFullYear());
@@ -61,8 +59,8 @@ export default function ReportScreen() {
     if (periodMode === 'quarter') {
       return formatQuarterLabel(year, quarter);
     }
-    return formatPeriodRange(period);
-  }, [periodMode, year, month, quarter, period]);
+    return formatPeriod(period);
+  }, [periodMode, year, month, quarter, period, formatPeriod]);
 
   const load = useCallback(async () => {
     setLoading(true);

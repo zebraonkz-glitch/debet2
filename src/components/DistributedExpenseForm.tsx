@@ -24,7 +24,7 @@ import {
   updateLongTermExpense,
   updateRecurringExpense,
 } from '@/db';
-import { useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type {
   AllocationRule,
   Category,
@@ -52,6 +52,7 @@ type ExpenseFormProps = {
 export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormProps) {
   const db = useDb();
   const router = useRouter();
+  const { amountFieldLabel } = useDisplayFormat();
   const [categories, setCategories] = useState<Category[]>([]);
   const [rules, setRules] = useState<AllocationRule[]>([]);
   const [categoryId, setCategoryId] = useState('');
@@ -213,7 +214,7 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
 
         {kind === 'recurring' ? (
           <>
-            <FormField label="Сумма, ₽" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
+            <FormField label={amountFieldLabel()} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
             <Text style={styles.label}>Период</Text>
             {(['monthly', 'yearly'] as RecurringPeriod[]).map((item) => (
               <Pressable key={item} onPress={() => setPeriod(item)}>
@@ -226,7 +227,7 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
         ) : (
           <>
             <FormField
-              label="Общая сумма, ₽"
+              label={amountFieldLabel('Общая сумма')}
               value={totalAmount}
               onChangeText={setTotalAmount}
               keyboardType="decimal-pad"

@@ -30,7 +30,7 @@ export const DISTRIBUTION_METHOD_LABELS: Record<DistributionMethod, string> = {
   manual: 'По правилу распределения',
 };
 
-import { getDisplaySettingsSnapshot, type AppCurrency } from './displaySettings';
+import { getDisplaySettingsSnapshot, type AppCurrency, type DisplaySettings } from './displaySettings';
 
 const CURRENCY_LOCALES: Record<AppCurrency, string> = {
   RUB: 'ru-RU',
@@ -39,22 +39,28 @@ const CURRENCY_LOCALES: Record<AppCurrency, string> = {
   EUR: 'de-DE',
 };
 
-export function formatMoney(amount: number): string {
-  const { currency } = getDisplaySettingsSnapshot();
-  return new Intl.NumberFormat(CURRENCY_LOCALES[currency], {
+export function formatMoneyWithSettings(amount: number, settings: DisplaySettings): string {
+  return new Intl.NumberFormat(CURRENCY_LOCALES[settings.currency], {
     style: 'currency',
-    currency,
+    currency: settings.currency,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-export function formatDate(date: string): string {
+export function formatDateWithSettings(date: string, settings: DisplaySettings): string {
   const [year, month, day] = date.split('-');
-  const { dateFormat } = getDisplaySettingsSnapshot();
-  if (dateFormat === 'yyyy-mm-dd') {
+  if (settings.dateFormat === 'yyyy-mm-dd') {
     return date;
   }
   return `${day}.${month}.${year}`;
+}
+
+export function formatMoney(amount: number): string {
+  return formatMoneyWithSettings(amount, getDisplaySettingsSnapshot());
+}
+
+export function formatDate(date: string): string {
+  return formatDateWithSettings(date, getDisplaySettingsSnapshot());
 }
 
 export function todayIsoDate(): string {
@@ -100,6 +106,9 @@ export function formatQuarterLabel(year: number, quarter: 1 | 2 | 3 | 4): string
   return `${quarter}-й квартал ${year}`;
 }
 
-export function formatPeriodRange(period: { dateFrom: string; dateTo: string }): string {
-  return `${formatDate(period.dateFrom)} — ${formatDate(period.dateTo)}`;
+export function formatPeriodRange(
+  period: { dateFrom: string; dateTo: string },
+  settings: DisplaySettings = getDisplaySettingsSnapshot(),
+): string {
+  return `${formatDateWithSettings(period.dateFrom, settings)} — ${formatDateWithSettings(period.dateTo, settings)}`;
 }

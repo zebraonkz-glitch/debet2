@@ -3,10 +3,9 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { buildProjectReportDetail } from '@/domain/reportService';
-import { useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { ProjectReportDetail } from '@/types';
 import { Colors } from '@/utils/colors';
-import { formatMoney, formatPeriodRange } from '@/utils/format';
 
 export default function ProjectReportDetailScreen() {
   const { projectId, dateFrom, dateTo } = useLocalSearchParams<{
@@ -15,6 +14,7 @@ export default function ProjectReportDetailScreen() {
     dateTo: string;
   }>();
   const db = useDb();
+  const { formatMoney, formatPeriod } = useDisplayFormat();
   const [detail, setDetail] = useState<ProjectReportDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +59,7 @@ export default function ProjectReportDetailScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{detail.projectName}</Text>
-      <Text style={styles.subtitle}>{formatPeriodRange(detail.period)}</Text>
+      <Text style={styles.subtitle}>{formatPeriod(detail.period)}</Text>
 
       <View style={styles.summaryCard}>
         <SummaryRow label="Доходы" value={detail.income} positive />
@@ -113,6 +113,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function LineRow({ title, amount }: { title: string; amount: number }) {
+  const { formatMoney } = useDisplayFormat();
   return (
     <View style={styles.lineRow}>
       <Text style={styles.lineTitle}>{title}</Text>
@@ -132,6 +133,7 @@ function SummaryRow({
   positive?: boolean;
   highlight?: boolean;
 }) {
+  const { formatMoney } = useDisplayFormat();
   const valueStyle = positive === undefined ? styles.neutral : positive ? styles.income : styles.expense;
   return (
     <View style={styles.summaryRow}>

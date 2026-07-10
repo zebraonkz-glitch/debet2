@@ -8,10 +8,10 @@ import { ScreenLoading } from '@/components/ScreenLoading';
 import { FilterChip, FilterRow } from '@/components/FilterChip';
 import { OptionPickerModal, type SelectOption } from '@/components/OptionPickerModal';
 import { getAllProjects, getTransactionsEnriched } from '@/db';
-import { useAppSettings, useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { Project, TransactionEnriched } from '@/types';
 import { Colors } from '@/utils/colors';
-import { formatDate, formatMoney, getCurrentMonthRange } from '@/utils/format';
+import { getCurrentMonthRange } from '@/utils/format';
 
 type TypeFilter = 'all' | 'income' | 'expense';
 type PeriodFilter = 'month' | 'all';
@@ -26,7 +26,7 @@ export default function OperationsScreen() {
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [projectPickerVisible, setProjectPickerVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  useAppSettings();
+  const { formatMoney, formatDate } = useDisplayFormat();
 
   const load = useCallback(async () => {
     setLoading(true);

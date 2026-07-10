@@ -4,11 +4,10 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Card, EmptyState, ScreenLoading, SummaryRow } from '@/components';
 import { buildActivityReport } from '@/domain/reportService';
 import { isReportRowEmpty } from '@/utils/csvExport';
-import { useAppSettings, useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { ActivityReport } from '@/types';
 import { Colors } from '@/utils/colors';
 import {
-  formatMoney,
   formatMonthYear,
   getCurrentMonthRange,
 } from '@/utils/format';
@@ -17,7 +16,7 @@ import { Theme } from '@/utils/theme';
 export default function HomeScreen() {
   const db = useDb();
   const router = useRouter();
-  useAppSettings();
+  const { formatMoney } = useDisplayFormat();
   const now = new Date();
   const [report, setReport] = useState<ActivityReport | null>(null);
   const [loading, setLoading] = useState(true);

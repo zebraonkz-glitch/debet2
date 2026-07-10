@@ -23,6 +23,20 @@ export const DATE_FORMAT_OPTIONS: { id: AppDateFormat; label: string }[] = [
   { id: 'yyyy-mm-dd', label: 'ГГГГ-ММ-ДД' },
 ];
 
+export const CURRENCY_SYMBOLS: Record<AppCurrency, string> = {
+  RUB: '₽',
+  KZT: '₸',
+  USD: '$',
+  EUR: '€',
+};
+
+export function getAmountFieldLabel(
+  settings: DisplaySettings,
+  base = 'Сумма',
+): string {
+  return `${base}, ${CURRENCY_SYMBOLS[settings.currency]}`;
+}
+
 let currentSettings: DisplaySettings = { ...DEFAULT_DISPLAY_SETTINGS };
 
 export function getDisplaySettingsSnapshot(): DisplaySettings {

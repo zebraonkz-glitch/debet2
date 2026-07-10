@@ -3,16 +3,16 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { PrimaryButton } from '@/components/Form';
 import { archiveProject, getAllProjects, getTransactionsEnriched } from '@/db';
-import { useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { Project, TransactionEnriched } from '@/types';
 import { Colors } from '@/utils/colors';
 import { confirmDestructive } from '@/utils/confirm';
-import { formatDate, formatMoney } from '@/utils/format';
 
 export default function ProjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const db = useDb();
   const router = useRouter();
+  const { formatMoney, formatDate } = useDisplayFormat();
   const [project, setProject] = useState<Project | null>(null);
   const [transactions, setTransactions] = useState<TransactionEnriched[]>([]);
 

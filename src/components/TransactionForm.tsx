@@ -17,7 +17,7 @@ import {
   getAllProjects,
   updateTransaction,
 } from '@/db';
-import { useDb } from '@/hooks';
+import { useDb, useDisplayFormat } from '@/hooks';
 import type { Category, CategoryType, Project, Transaction } from '@/types';
 import { Colors } from '@/utils/colors';
 import { todayIsoDate } from '@/utils/format';
@@ -39,6 +39,7 @@ export function TransactionForm({
 }: TransactionFormProps) {
   const db = useDb();
   const router = useRouter();
+  const { amountFieldLabel } = useDisplayFormat();
   const categoryType: CategoryType = operationType === 'income' ? 'income' : 'expense_direct';
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -178,7 +179,7 @@ export function TransactionForm({
         ) : null}
 
         <FormField
-          label="Сумма, ₽"
+          label={amountFieldLabel()}
           value={amount}
           onChangeText={setAmount}
           keyboardType="decimal-pad"
