@@ -4,10 +4,11 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { Fab } from '@/components/Form';
+import { ScreenLoading } from '@/components/ScreenLoading';
 import { FilterChip, FilterRow } from '@/components/FilterChip';
 import { OptionPickerModal, type SelectOption } from '@/components/OptionPickerModal';
 import { getAllProjects, getTransactionsEnriched } from '@/db';
-import { useDb } from '@/hooks';
+import { useAppSettings, useDb } from '@/hooks';
 import type { Project, TransactionEnriched } from '@/types';
 import { Colors } from '@/utils/colors';
 import { formatDate, formatMoney, getCurrentMonthRange } from '@/utils/format';
@@ -24,31 +25,38 @@ export default function OperationsScreen() {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('month');
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [projectPickerVisible, setProjectPickerVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  useAppSettings();
 
   const load = useCallback(async () => {
-    const allProjects = await getAllProjects(db);
-    setProjects(allProjects);
+    setLoading(true);
+    try {
+      const allProjects = await getAllProjects(db);
+      setProjects(allProjects);
 
-    const filters: Parameters<typeof getTransactionsEnriched>[1] = {
-      categoryTypes: ['income', 'expense_direct'],
-    };
+      const filters: Parameters<typeof getTransactionsEnriched>[1] = {
+        categoryTypes: ['income', 'expense_direct'],
+      };
 
-    if (projectFilter !== 'all') {
-      filters.projectId = projectFilter;
-    }
-    if (periodFilter === 'month') {
-      const range = getCurrentMonthRange();
-      filters.dateFrom = range.dateFrom;
-      filters.dateTo = range.dateTo;
-    }
-    if (typeFilter === 'income') {
-      filters.categoryTypes = ['income'];
-    } else if (typeFilter === 'expense') {
-      filters.categoryTypes = ['expense_direct'];
-    }
+      if (projectFilter !== 'all') {
+        filters.projectId = projectFilter;
+      }
+      if (periodFilter === 'month') {
+        const range = getCurrentMonthRange();
+        filters.dateFrom = range.dateFrom;
+        filters.dateTo = range.dateTo;
+      }
+      if (typeFilter === 'income') {
+        filters.categoryTypes = ['income'];
+      } else if (typeFilter === 'expense') {
+        filters.categoryTypes = ['expense_direct'];
+      }
 
-    const data = await getTransactionsEnriched(db, filters);
-    setTransactions(data);
+      const data = await getTransactionsEnriched(db, filters);
+      setTransactions(data);
+    } finally {
+      setLoading(false);
+    }
   }, [db, periodFilter, projectFilter, typeFilter]);
 
   useFocusEffect(
@@ -67,6 +75,10 @@ export default function OperationsScreen() {
 
   const selectedProjectLabel =
     projectOptions.find((p) => p.id === projectFilter)?.label ?? 'Все проекты';
+
+  if (loading) {
+    return <ScreenLoading />;
+  }
 
   return (
     <View style={styles.container}>

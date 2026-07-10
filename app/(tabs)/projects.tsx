@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -11,20 +10,28 @@ import {
 import { useFocusEffect, useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { Fab } from '@/components/Form';
+import { ScreenLoading } from '@/components/ScreenLoading';
 import { archiveProject, getAllProjects } from '@/db';
 import { useDb } from '@/hooks';
 import type { Project } from '@/types';
 import { Colors } from '@/utils/colors';
+import { confirmDestructive } from '@/utils/confirm';
 
 export default function ProjectsScreen() {
   const db = useDb();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [showArchived, setShowArchived] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadProjects = useCallback(async () => {
-    const data = await getAllProjects(db, { includeInactive: showArchived });
-    setProjects(data);
+    setLoading(true);
+    try {
+      const data = await getAllProjects(db, { includeInactive: showArchived });
+      setProjects(data);
+    } finally {
+      setLoading(false);
+    }
   }, [db, showArchived]);
 
   useFocusEffect(
@@ -34,18 +41,20 @@ export default function ProjectsScreen() {
   );
 
   const handleArchive = (project: Project) => {
-    Alert.alert('Архивировать проект?', project.name, [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Архивировать',
-        style: 'destructive',
-        onPress: async () => {
-          await archiveProject(db, project.id);
-          loadProjects();
-        },
+    confirmDestructive(
+      'Архивировать проект?',
+      project.name,
+      'Архивировать',
+      async () => {
+        await archiveProject(db, project.id);
+        await loadProjects();
       },
-    ]);
+    );
   };
+
+  if (loading) {
+    return <ScreenLoading />;
+  }
 
   return (
     <View style={styles.container}>

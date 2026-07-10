@@ -15,6 +15,8 @@ import { OptionPickerModal, type SelectOption } from '@/components/OptionPickerM
 import {
   createLongTermExpense,
   createRecurringExpense,
+  deleteLongTermExpense,
+  deleteRecurringExpense,
   getAllAllocationRules,
   getAllCategories,
   getLongTermExpenseById,
@@ -32,12 +34,14 @@ import type {
   RecurringPeriod,
 } from '@/types';
 import { Colors } from '@/utils/colors';
+import { confirmDestructive } from '@/utils/confirm';
 import {
   DISTRIBUTION_METHOD_LABELS,
   RECURRING_PERIOD_LABELS,
   todayIsoDate,
 } from '@/utils/format';
 import { ValidationError } from '@/utils/validation';
+import { ScreenLoading } from '@/components/ScreenLoading';
 
 type ExpenseFormProps = {
   kind: 'recurring' | 'long-term';
@@ -169,12 +173,21 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
     }
   };
 
+  const handleDelete = () => {
+    if (!expenseId) return;
+    const title = kind === 'recurring' ? 'Удалить постоянный расход?' : 'Удалить долгоиграющий расход?';
+    confirmDestructive(title, 'Действие нельзя отменить', 'Удалить', async () => {
+      if (kind === 'recurring') {
+        await deleteRecurringExpense(db, expenseId);
+      } else {
+        await deleteLongTermExpense(db, expenseId);
+      }
+      router.back();
+    });
+  };
+
   if (!loaded) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.muted}>Загрузка…</Text>
-      </View>
-    );
+    return <ScreenLoading />;
   }
 
   return (
@@ -240,6 +253,11 @@ export function DistributedExpenseForm({ kind, mode, expenseId }: ExpenseFormPro
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Сохранить" onPress={handleSubmit} />
+        {mode === 'edit' ? (
+          <View style={styles.deleteWrap}>
+            <PrimaryButton title="Удалить" variant="danger" onPress={handleDelete} />
+          </View>
+        ) : null}
       </ScrollView>
 
       <OptionPickerModal
@@ -279,4 +297,5 @@ const styles = StyleSheet.create({
   },
   optionActive: { backgroundColor: '#e8effd', borderColor: Colors.primary },
   error: { color: Colors.danger, marginBottom: 12 },
+  deleteWrap: { marginTop: 12 },
 });

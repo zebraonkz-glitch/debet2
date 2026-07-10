@@ -1,4 +1,15 @@
 export { Colors } from './colors';
+export { Theme } from './theme';
+export {
+  applyDisplaySettings,
+  CURRENCY_OPTIONS,
+  DATE_FORMAT_OPTIONS,
+  DEFAULT_DISPLAY_SETTINGS,
+  getDisplaySettingsSnapshot,
+  type AppCurrency,
+  type AppDateFormat,
+  type DisplaySettings,
+} from './displaySettings';
 export { generateId, nowIso } from './id';
 export {
   CATEGORY_TYPE_LABELS,
@@ -33,3 +44,4 @@ export {
   isReportRowEmpty,
 } from './csvExport';
 export { shareActivityReportCsv } from './reportExport';
+export { confirmDestructive, showErrorAlert } from './confirm';

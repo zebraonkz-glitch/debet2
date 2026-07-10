@@ -3,15 +3,18 @@ import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import 'react-native-reanimated';
 import { DatabaseProvider } from '@/components/DatabaseProvider';
+import { SettingsProvider } from '@/context/SettingsContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <DatabaseProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <SettingsProvider>
+      <DatabaseProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="settings/index" options={{ title: 'Настройки' }} />
           <Stack.Screen name="project/new" options={{ title: 'Новый проект', presentation: 'modal' }} />
           <Stack.Screen name="project/[id]" options={{ title: 'Проект' }} />
           <Stack.Screen name="project/[id]/edit" options={{ title: 'Редактирование', presentation: 'modal' }} />
@@ -37,8 +40,9 @@ export default function RootLayout() {
           />
           <Stack.Screen name="long-term/[id]" options={{ title: 'Долгоиграющий расход' }} />
           <Stack.Screen name="report/[projectId]" options={{ title: 'Детализация' }} />
-        </Stack>
-      </ThemeProvider>
-    </DatabaseProvider>
+          </Stack>
+        </ThemeProvider>
+      </DatabaseProvider>
+    </SettingsProvider>
   );
 }

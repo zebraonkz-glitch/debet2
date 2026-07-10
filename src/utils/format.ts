@@ -30,16 +30,23 @@ export const DISTRIBUTION_METHOD_LABELS: Record<DistributionMethod, string> = {
   manual: 'По правилу распределения',
 };
 
+import { getDisplaySettingsSnapshot } from './displaySettings';
+
 export function formatMoney(amount: number): string {
+  const { currency } = getDisplaySettingsSnapshot();
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
-    currency: 'RUB',
+    currency,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
 export function formatDate(date: string): string {
   const [year, month, day] = date.split('-');
+  const { dateFormat } = getDisplaySettingsSnapshot();
+  if (dateFormat === 'yyyy-mm-dd') {
+    return date;
+  }
   return `${day}.${month}.${year}`;
 }
 

@@ -1,10 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { CategoryType } from '@/types';
+import {
+  applyDisplaySettings,
+  DEFAULT_DISPLAY_SETTINGS,
+  type DisplaySettings,
+} from './displaySettings';
 
 const KEYS = {
   lastProjectId: 'prefs.lastProjectId',
   lastIncomeCategoryId: 'prefs.lastIncomeCategoryId',
   lastExpenseCategoryId: 'prefs.lastExpenseCategoryId',
+  displaySettings: 'prefs.displaySettings',
 } as const;
 
 export async function getLastProjectId(): Promise<string | null> {
@@ -47,4 +53,26 @@ export async function saveLastOperationDefaults(
   categoryId: string,
 ): Promise<void> {
   await Promise.all([setLastProjectId(projectId), setLastCategoryId(categoryType, categoryId)]);
+}
+
+export async function loadDisplaySettings(): Promise<DisplaySettings> {
+  const raw = await AsyncStorage.getItem(KEYS.displaySettings);
+  if (!raw) {
+    return { ...DEFAULT_DISPLAY_SETTINGS };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<DisplaySettings>;
+    return {
+      currency: parsed.currency ?? DEFAULT_DISPLAY_SETTINGS.currency,
+      dateFormat: parsed.dateFormat ?? DEFAULT_DISPLAY_SETTINGS.dateFormat,
+    };
+  } catch {
+    return { ...DEFAULT_DISPLAY_SETTINGS };
+  }
+}
+
+export async function saveDisplaySettings(settings: DisplaySettings): Promise<void> {
+  await AsyncStorage.setItem(KEYS.displaySettings, JSON.stringify(settings));
+  applyDisplaySettings(settings);
 }

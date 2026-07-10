@@ -11,15 +11,18 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FormField, PrimaryButton } from '@/components/Form';
+import { ScreenLoading } from '@/components/ScreenLoading';
 import {
   createAllocationRule,
+  deleteAllocationRule,
   getAllocationRuleById,
   getAllProjects,
   updateAllocationRule,
 } from '@/db';
 import { useDb } from '@/hooks';
-import type { AllocationMethod, AllocationRule, AllocationShare, Project } from '@/types';
+import type { AllocationMethod, AllocationShare, Project } from '@/types';
 import { Colors } from '@/utils/colors';
+import { confirmDestructive } from '@/utils/confirm';
 import { ALLOCATION_METHOD_LABELS } from '@/utils/format';
 import { ValidationError } from '@/utils/validation';
 
@@ -113,12 +116,21 @@ export function AllocationRuleForm({ mode, ruleId }: AllocationRuleFormProps) {
     }
   };
 
-  if (!loaded) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.muted}>Загрузка…</Text>
-      </View>
+  const handleDelete = () => {
+    if (!ruleId) return;
+    confirmDestructive(
+      'Удалить правило?',
+      'Правило нельзя удалить, если на него ссылаются расходы.',
+      'Удалить',
+      async () => {
+        await deleteAllocationRule(db, ruleId);
+        router.back();
+      },
     );
+  };
+
+  if (!loaded) {
+    return <ScreenLoading />;
   }
 
   return (
@@ -172,6 +184,11 @@ export function AllocationRuleForm({ mode, ruleId }: AllocationRuleFormProps) {
           title={mode === 'create' ? 'Создать правило' : 'Сохранить'}
           onPress={handleSubmit}
         />
+        {mode === 'edit' ? (
+          <View style={styles.deleteWrap}>
+            <PrimaryButton title="Удалить правило" variant="danger" onPress={handleDelete} />
+          </View>
+        ) : null}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -200,4 +217,5 @@ const styles = StyleSheet.create({
   shareInput: { marginBottom: 0 },
   shareTotal: { fontSize: 14, color: Colors.textMuted, marginTop: 4 },
   error: { color: Colors.danger, marginBottom: 12 },
+  deleteWrap: { marginTop: 12 },
 });

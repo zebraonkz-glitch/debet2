@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { PrimaryButton } from '@/components/Form';
 import { archiveProject, getAllProjects, getTransactionsEnriched } from '@/db';
 import { useDb } from '@/hooks';
 import type { Project, TransactionEnriched } from '@/types';
 import { Colors } from '@/utils/colors';
+import { confirmDestructive } from '@/utils/confirm';
 import { formatDate, formatMoney } from '@/utils/format';
 
 export default function ProjectDetailScreen() {
@@ -41,17 +42,10 @@ export default function ProjectDetailScreen() {
   }
 
   const handleArchive = () => {
-    Alert.alert('Архивировать проект?', project.name, [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Архивировать',
-        style: 'destructive',
-        onPress: async () => {
-          await archiveProject(db, project.id);
-          router.back();
-        },
-      },
-    ]);
+    confirmDestructive('Архивировать проект?', project.name, 'Архивировать', async () => {
+      await archiveProject(db, project.id);
+      router.back();
+    });
   };
 
   return (

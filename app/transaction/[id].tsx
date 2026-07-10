@@ -1,12 +1,14 @@
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { PrimaryButton } from '@/components/Form';
+import { ScreenLoading } from '@/components/ScreenLoading';
 import { TransactionForm } from '@/components/TransactionForm';
 import { deleteTransaction, getCategoryById, getTransactionById } from '@/db';
 import { useDb } from '@/hooks';
 import type { Transaction } from '@/types';
 import { Colors } from '@/utils/colors';
+import { confirmDestructive } from '@/utils/confirm';
 
 export default function EditTransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -14,14 +16,20 @@ export default function EditTransactionScreen() {
   const router = useRouter();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [operationType, setOperationType] = useState<'income' | 'expense'>('income');
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     if (!id) return;
-    const tx = await getTransactionById(db, id);
-    setTransaction(tx);
-    if (tx) {
-      const category = await getCategoryById(db, tx.categoryId);
-      setOperationType(category?.type === 'income' ? 'income' : 'expense');
+    setLoading(true);
+    try {
+      const tx = await getTransactionById(db, id);
+      setTransaction(tx);
+      if (tx) {
+        const category = await getCategoryById(db, tx.categoryId);
+        setOperationType(category?.type === 'income' ? 'income' : 'expense');
+      }
+    } finally {
+      setLoading(false);
     }
   }, [db, id]);
 
@@ -33,18 +41,15 @@ export default function EditTransactionScreen() {
 
   const handleDelete = () => {
     if (!id) return;
-    Alert.alert('Удалить операцию?', 'Действие нельзя отменить', [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteTransaction(db, id);
-          router.back();
-        },
-      },
-    ]);
+    confirmDestructive('Удалить операцию?', 'Действие нельзя отменить', 'Удалить', async () => {
+      await deleteTransaction(db, id);
+      router.back();
+    });
   };
+
+  if (loading) {
+    return <ScreenLoading />;
+  }
 
   if (!transaction) {
     return (

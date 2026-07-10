@@ -15,7 +15,7 @@ import { FilterChip, FilterRow } from '@/components/FilterChip';
 import { PrimaryButton } from '@/components/Form';
 import { buildActivityReport } from '@/domain/reportService';
 import { getCurrentQuarter, getMonthRange, getQuarterRange } from '@/domain/periodUtils';
-import { useDb } from '@/hooks';
+import { useAppSettings, useDb } from '@/hooks';
 import type { ActivityReport } from '@/types';
 import { Colors } from '@/utils/colors';
 import {
@@ -32,6 +32,7 @@ type PeriodMode = 'month' | 'quarter' | 'custom';
 export default function ReportScreen() {
   const db = useDb();
   const router = useRouter();
+  useAppSettings();
   const now = new Date();
   const [periodMode, setPeriodMode] = useState<PeriodMode>('month');
   const [year, setYear] = useState(now.getFullYear());

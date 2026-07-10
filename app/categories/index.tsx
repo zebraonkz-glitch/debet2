@@ -16,6 +16,7 @@ import { useDb } from '@/hooks';
 import type { Category, CategoryType } from '@/types';
 import { Colors } from '@/utils/colors';
 import { CATEGORY_TYPE_LABELS } from '@/utils/format';
+import { confirmDestructive, showErrorAlert } from '@/utils/confirm';
 import { ValidationError } from '@/utils/validation';
 
 const GROUP_ORDER: CategoryType[] = [
@@ -65,26 +66,16 @@ export default function CategoriesScreen() {
   };
 
   const handleDelete = (category: Category) => {
-    Alert.alert('Удалить категорию?', category.name, [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteCategory(db, category.id);
-            load();
-          } catch (err) {
-            Alert.alert(
-              'Ошибка',
-              err instanceof Error
-                ? err.message
-                : 'Категория используется в операциях',
-            );
-          }
-        },
-      },
-    ]);
+    confirmDestructive('Удалить категорию?', category.name, 'Удалить', async () => {
+      try {
+        await deleteCategory(db, category.id);
+        await load();
+      } catch (err) {
+        showErrorAlert(
+          err instanceof Error ? err.message : 'Категория используется в операциях',
+        );
+      }
+    });
   };
 
   return (

@@ -1,74 +1,143 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { getAllProjects, getTransactionsEnriched } from '@/db';
-import { useDb } from '@/hooks';
+import { Card, EmptyState, ScreenLoading, SummaryRow } from '@/components';
+import { buildActivityReport } from '@/domain/reportService';
+import { isReportRowEmpty } from '@/utils/csvExport';
+import { useAppSettings, useDb } from '@/hooks';
+import type { ActivityReport } from '@/types';
 import { Colors } from '@/utils/colors';
-import { formatMoney, getCurrentMonthRange } from '@/utils/format';
+import {
+  formatMoney,
+  formatMonthYear,
+  getCurrentMonthRange,
+} from '@/utils/format';
+import { Theme } from '@/utils/theme';
 
 export default function HomeScreen() {
   const db = useDb();
   const router = useRouter();
-  const [income, setIncome] = useState(0);
-  const [expense, setExpense] = useState(0);
-  const [projectCount, setProjectCount] = useState(0);
+  useAppSettings();
+  const now = new Date();
+  const [report, setReport] = useState<ActivityReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadSummary = useCallback(async () => {
-    const range = getCurrentMonthRange();
-    const [projects, transactions] = await Promise.all([
-      getAllProjects(db),
-      getTransactionsEnriched(db, {
-        dateFrom: range.dateFrom,
-        dateTo: range.dateTo,
-        categoryTypes: ['income', 'expense_direct'],
-      }),
-    ]);
+  const monthLabel = useMemo(
+    () => formatMonthYear(now.getFullYear(), now.getMonth() + 1),
+    [now],
+  );
 
-    setProjectCount(projects.length);
-    setIncome(
-      transactions
-        .filter((t) => t.categoryType === 'income')
-        .reduce((sum, t) => sum + t.amount, 0),
-    );
-    setExpense(
-      transactions
-        .filter((t) => t.categoryType === 'expense_direct')
-        .reduce((sum, t) => sum + t.amount, 0),
-    );
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await buildActivityReport(db, getCurrentMonthRange());
+      setReport(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Не удалось загрузить сводку';
+      setError(message);
+      setReport(null);
+    } finally {
+      setLoading(false);
+    }
   }, [db]);
 
   useFocusEffect(
     useCallback(() => {
-      loadSummary();
-    }, [loadSummary]),
+      void loadDashboard();
+    }, [loadDashboard]),
   );
 
-  const result = useMemo(() => income - expense, [income, expense]);
+  const activeProjects = useMemo(
+    () => report?.rows.filter((row) => !isReportRowEmpty(row)) ?? [],
+    [report],
+  );
+
+  if (loading) {
+    return <ScreenLoading message="Загрузка сводки…" />;
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <EmptyState title="Не удалось загрузить данные" description={error} />
+        <Pressable style={styles.retryButton} onPress={() => void loadDashboard()}>
+          <Text style={styles.retryText}>Повторить</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const totals = report?.totals;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Главная</Text>
-      <Text style={styles.subtitle}>Текущий месяц</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.subtitle}>{monthLabel}</Text>
 
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Доходы</Text>
-          <Text style={[styles.value, styles.income]}>{formatMoney(income)}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Расходы</Text>
-          <Text style={[styles.value, styles.expense]}>{formatMoney(expense)}</Text>
-        </View>
-        <View style={[styles.row, styles.resultRow]}>
-          <Text style={styles.resultLabel}>Результат</Text>
-          <Text style={[styles.value, result >= 0 ? styles.income : styles.expense]}>
-            {formatMoney(result)}
-          </Text>
-        </View>
-        <Text style={styles.meta}>Активных проектов: {projectCount}</Text>
-      </View>
+      <Card>
+        <Text style={styles.cardTitle}>Итог месяца</Text>
+        <SummaryRow label="Доходы" value={formatMoney(totals?.income ?? 0)} valueTone="income" />
+        <SummaryRow
+          label="Прямые расходы"
+          value={formatMoney(totals?.directExpense ?? 0)}
+          valueTone="expense"
+        />
+        <SummaryRow
+          label="Постоянные"
+          value={formatMoney(totals?.recurringExpense ?? 0)}
+          valueTone="expense"
+        />
+        <SummaryRow
+          label="Долгоиграющие"
+          value={formatMoney(totals?.longTermExpense ?? 0)}
+          valueTone="expense"
+        />
+        <SummaryRow
+          label="Результат"
+          value={formatMoney(totals?.result ?? 0)}
+          valueTone={(totals?.result ?? 0) >= 0 ? 'income' : 'expense'}
+          highlight
+        />
+      </Card>
 
-      <Text style={styles.section}>Быстрый ввод</Text>
+      <Text style={styles.sectionTitle}>Проекты</Text>
+      {activeProjects.length === 0 ? (
+        <EmptyState
+          title="Нет данных за месяц"
+          description="Добавьте операции или настройте распределённые расходы."
+          style={styles.emptyProjects}
+        />
+      ) : (
+        activeProjects.map((row) => (
+          <Card
+            key={row.projectId}
+            onPress={() =>
+              router.push({
+                pathname: '/report/[projectId]',
+                params: {
+                  projectId: row.projectId,
+                  dateFrom: report!.period.dateFrom,
+                  dateTo: report!.period.dateTo,
+                },
+              })
+            }
+          >
+            <Text style={styles.projectName}>{row.projectName}</Text>
+            <View style={styles.projectStats}>
+              <Stat label="Доход" value={formatMoney(row.income)} tone="income" />
+              <Stat label="Расход" value={formatMoney(row.totalExpense)} tone="expense" />
+              <Stat
+                label="Итог"
+                value={formatMoney(row.result)}
+                tone={row.result >= 0 ? 'income' : 'expense'}
+              />
+            </View>
+          </Card>
+        ))
+      )}
+
+      <Text style={styles.sectionTitle}>Быстрый ввод</Text>
       <View style={styles.quickRow}>
         <Pressable
           style={[styles.quickButton, styles.quickIncome]}
@@ -88,71 +157,85 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      <Pressable style={styles.link} onPress={() => router.push('/categories/index')}>
+      <Pressable style={styles.link} onPress={() => router.push('/categories')}>
         <Text style={styles.linkText}>Справочник категорий →</Text>
       </Pressable>
+      <Pressable style={styles.link} onPress={() => router.push('/(tabs)/report')}>
+        <Text style={styles.linkText}>Полный отчёт →</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: 'income' | 'expense';
+}) {
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, tone === 'income' ? styles.income : styles.expense]}>
+        {value}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: Colors.background,
+  container: Theme.screen,
+  content: {
+    padding: Theme.spacing.lg,
+    paddingBottom: Theme.spacing.xl,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 4,
+  centered: {
+    ...Theme.screen,
+    justifyContent: 'center',
+    padding: Theme.spacing.lg,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    marginBottom: 16,
+    ...Theme.typography.caption,
+    marginBottom: Theme.spacing.md,
+    textTransform: 'capitalize',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: 24,
+  cardTitle: {
+    ...Theme.typography.section,
+    marginBottom: Theme.spacing.sm,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+  sectionTitle: {
+    ...Theme.typography.section,
+    marginBottom: Theme.spacing.sm,
+    marginTop: Theme.spacing.xs,
   },
-  resultRow: {
-    marginTop: 6,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  label: { fontSize: 15, color: Colors.text },
-  resultLabel: { fontSize: 16, fontWeight: '600', color: Colors.text },
-  value: { fontSize: 16, fontWeight: '700' },
-  income: { color: Colors.success },
-  expense: { color: Colors.danger },
-  meta: { fontSize: 13, color: Colors.textMuted, marginTop: 8 },
-  section: {
+  projectName: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: Theme.spacing.sm,
   },
+  projectStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Theme.spacing.sm,
+  },
+  stat: { flex: 1 },
+  statLabel: Theme.typography.caption,
+  statValue: { fontSize: 14, fontWeight: '700', marginTop: 2 },
+  income: { color: Colors.success },
+  expense: { color: Colors.danger },
   quickRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    gap: Theme.spacing.sm,
+    marginBottom: Theme.spacing.md,
   },
   quickButton: {
     flex: 1,
     paddingVertical: 18,
-    borderRadius: 12,
+    borderRadius: Theme.radius.md,
     alignItems: 'center',
   },
   quickIncome: { backgroundColor: Colors.success },
@@ -162,6 +245,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  link: { paddingVertical: 8 },
+  link: { paddingVertical: Theme.spacing.sm },
   linkText: { fontSize: 15, color: Colors.primary, fontWeight: '600' },
+  emptyProjects: { paddingVertical: Theme.spacing.md },
+  retryButton: {
+    marginTop: Theme.spacing.md,
+    alignSelf: 'center',
+    paddingHorizontal: Theme.spacing.lg,
+    paddingVertical: Theme.spacing.sm,
+    borderRadius: Theme.radius.md,
+    backgroundColor: Colors.primary,
+  },
+  retryText: { color: '#fff', fontWeight: '600' },
 });

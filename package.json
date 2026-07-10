@@ -10,7 +10,13 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "doctor": "npx expo-doctor",
+    "build:android:preview": "eas build --platform android --profile preview",
+    "build:android:production": "eas build --platform android --profile production",
+    "build:ios:preview": "eas build --platform ios --profile preview",
+    "build:ios:production": "eas build --platform ios --profile production"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -47,5 +53,10 @@
     "ts-jest": "^29.4.11",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "install": {
+      "exclude": ["jest", "@types/jest"]
+    }
+  }
 }

@@ -9,14 +9,16 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.debet2.app"
+      "bundleIdentifier": "com.debet2.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1a56db"
       },
-      "package": "com.debet2.app"
+      "package": "com.debet2.app",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
