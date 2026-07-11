@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { PrimaryButton } from '@/components/Form';
-import { archiveProject, getAllProjects, getTransactionsEnriched } from '@/db';
+import { archiveProject, getAllProjects, getTransactionsEnriched, restoreProject } from '@/db';
 import { useDb, useDisplayFormat } from '@/hooks';
 import type { Project, TransactionEnriched } from '@/types';
 import { Colors } from '@/utils/colors';
@@ -48,6 +48,11 @@ export default function ProjectDetailScreen() {
     });
   };
 
+  const handleRestore = async () => {
+    await restoreProject(db, project.id);
+    await load();
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{project.name}</Text>
@@ -65,7 +70,20 @@ export default function ProjectDetailScreen() {
           <View style={styles.spacer}>
             <PrimaryButton title="Архивировать" variant="secondary" onPress={handleArchive} />
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.spacer}>
+            <PrimaryButton
+              title="Восстановить из архива"
+              onPress={() => {
+                void handleRestore().catch((error: unknown) => {
+                  const message =
+                    error instanceof Error ? error.message : 'Не удалось восстановить проект';
+                  Alert.alert('Ошибка', message);
+                });
+              }}
+            />
+          </View>
+        )}
       </View>
 
       <Text style={styles.sectionTitle}>Последние операции</Text>

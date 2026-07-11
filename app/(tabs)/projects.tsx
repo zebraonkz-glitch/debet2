@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -11,7 +12,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { Fab } from '@/components/Form';
 import { ScreenLoading } from '@/components/ScreenLoading';
-import { archiveProject, getAllProjects } from '@/db';
+import { archiveProject, getAllProjects, restoreProject } from '@/db';
 import { useDb } from '@/hooks';
 import type { Project } from '@/types';
 import { Colors } from '@/utils/colors';
@@ -52,6 +53,24 @@ export default function ProjectsScreen() {
     );
   };
 
+  const handleRestore = (project: Project) => {
+    Alert.alert('Восстановить проект?', project.name, [
+      { text: 'Отмена', style: 'cancel' },
+      {
+        text: 'Восстановить',
+        onPress: () => {
+          void restoreProject(db, project.id)
+            .then(() => loadProjects())
+            .catch((error: unknown) => {
+              const message =
+                error instanceof Error ? error.message : 'Не удалось восстановить проект';
+              Alert.alert('Ошибка', message);
+            });
+        },
+      },
+    ]);
+  };
+
   if (loading) {
     return <ScreenLoading />;
   }
@@ -77,7 +96,7 @@ export default function ProjectsScreen() {
           <Pressable
             style={[styles.card, !item.isActive ? styles.cardArchived : null]}
             onPress={() => router.push({ pathname: '/project/[id]', params: { id: item.id } })}
-            onLongPress={() => item.isActive && handleArchive(item)}
+            onLongPress={() => (item.isActive ? handleArchive(item) : handleRestore(item))}
           >
             <Text style={styles.cardTitle}>{item.name}</Text>
             {item.description ? (

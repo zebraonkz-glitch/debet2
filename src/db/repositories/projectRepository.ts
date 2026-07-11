@@ -94,6 +94,10 @@ export async function archiveProject(db: SQLiteDatabase, id: string): Promise<Pr
   return updateProject(db, id, { isActive: false });
 }
 
+export async function restoreProject(db: SQLiteDatabase, id: string): Promise<Project> {
+  return updateProject(db, id, { isActive: true });
+}
+
 export async function deleteProject(db: SQLiteDatabase, id: string): Promise<void> {
   const result = await db.runAsync('DELETE FROM projects WHERE id = ?', id);
   if (result.changes === 0) {
